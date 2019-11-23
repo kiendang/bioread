@@ -1,0 +1,1 @@
+from modeling_cloze_qa import BertForClozeQA
