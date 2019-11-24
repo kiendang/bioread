@@ -1,6 +1,4 @@
-from transformers import (
-    BertForPreTraining, BertForTokenClassification, BertModel
-)
+from transformers import BertForPreTraining, BertModel
 
 import torch
 from torch import nn
@@ -17,7 +15,7 @@ class BertForClozeQA(BertForPreTraining):
         self.init_weights()
 
     def forward(self, input_ids=None, attention_mask=None, token_type_ids=None,
-                p_mask=None, candidates=None, start_positions=None):
+                p_mask=None, candidates=None, start_position=None, train=True):
         batch_dim, segment_dim, token_dim = input_ids.size()
         input_ids_flat, attention_mask_flat, token_type_ids_flat = tuple(
             torch.flatten(tensor, 0, 1)
@@ -35,14 +33,14 @@ class BertForClozeQA(BertForPreTraining):
 
         p = torch.softmax(start_logits_concat, dim=1)
         pm = p * p_mask
-        pm = pm / torch.sum(pm, dim=1).expand_as(pm)
-        pc = torch.bmm(pm.unsqueeze(-1), candidates)
+        pm = pm / torch.sum(pm, dim=1, keepdim=True).expand_as(pm)
+        pc = torch.bmm(pm.unsqueeze(1), torch.transpose(candidates, 1, 2).float()).squeeze(1)
 
-        outputs = (start_logits, ) + outputs[2:]
+        outputs = (pc, ) + outputs[2:]
 
-        if start_positions is not None:
+        if train:
             loss_fct = BCELoss()
-            loss = loss_fct(pc, start_positions)
+            loss = loss_fct(pc, start_position.float())
 
             outputs = (loss, ) + outputs
 
