@@ -8,10 +8,10 @@ from torch.utils.tensorboard import SummaryWriter
 
 from tqdm import tqdm, trange
 
-from transformers import BertConfig
 from transformers import AdamW, get_linear_schedule_with_warmup
 from modeling_cloze_qa import BertForClozeQA
 
+import argparse
 import logging
 from operator import getitem
 from pathlib import Path
@@ -21,10 +21,9 @@ from typing import List
 BERT = Path('/home/kien/biobert_v1.0_pubmed_pmc/')
 CACHE = Path('cache')
 MODEL = Path('model')
-LOG = Path('runs')
 
 
-batch_size = 3
+batch_size = 2
 num_train_epochs_set = 2
 learning_rate = 5e-5
 adam_epsilon = 1e-8
@@ -33,7 +32,7 @@ max_steps = -1
 gradient_accumulation_steps = 1
 weight_decay = 0.0
 max_grad_norm = 1.0
-eval_steps = 250
+eval_steps = 1000
 logging_steps = 100
 device = torch.device('cuda:0')
 
@@ -89,7 +88,7 @@ def collate_examples(examples: List[Example], train=True):
 
 def evaluate(model, data):
     sum_accuracy = 0
-    dataloader = DataLoader(valid_data, batch_size=batch_size, collate_fn=collate_examples)
+    dataloader = DataLoader(data, batch_size=batch_size, collate_fn=collate_examples)
     for batch in tqdm(dataloader, desc='Evaluating'):
         model.eval()
         batch = {field: t.to(device) for field, t in batch.items()}
@@ -103,7 +102,7 @@ def evaluate(model, data):
 
 
 def train(model, data):
-    tb_writer = SummaryWriter(LOG)
+    tb_writer = SummaryWriter()
 
     train_dataloader = DataLoader(data, batch_size=batch_size, collate_fn=collate_examples)
 
@@ -149,25 +148,56 @@ def train(model, data):
                 model.zero_grad()
                 global_step += 1
 
-                if global_step == 1 or logging_steps > 0 and global_step % logging_steps == 0:
-                    tb_writer.add_scalar("Train loss", (tr_loss - logging_loss) / logging_steps, global_step)
+                if logging_steps > 0 and global_step % logging_steps == 0:
+                    tb_writer.add_scalar('Train/Loss', (tr_loss - logging_loss) / logging_steps, global_step)
                     logging_loss = tr_loss
 
-                if global_step == 1 or global_step % eval_steps == 0:
+                if global_step == 1 or eval_steps > 0 and global_step % eval_steps == 0:
                     accuracy = evaluate(model, valid_data)
-                    tb_writer.add_scalar("Eval accuracy", accuracy, global_step)
+                    tb_writer.add_scalar('Eval/Accuracy', accuracy, global_step)
                     if accuracy > max_accuracy:
                         max_accuracy = accuracy
+                        logger.info('Saving model...')
                         model.save_pretrained(MODEL)
-                    tb_writer.add_scalar("Eval max accuracy", max_accuracy, global_step)
+                    tb_writer.add_scalar('Eval/MaxAccuracy', max_accuracy, global_step)
+                    logger.info(f"EVAL Accuracy: {accuracy} Max accuracy: {max_accuracy}")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--train', action='store_true',
+                        help='Whether to do training')
+    parser.add_argument('--eval', action='store_true',
+                        help='Whether to do evaluation')
+    parser.add_argument('--model', type=str, default=str(BERT),
+                        help='Path to model')
+    args = parser.parse_args()
+
+    logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
+                        datefmt = '%d/%m/%Y %H:%M:%S',
+                        level = logging.INFO)
+    logger = logging.getLogger(__name__)
+
+    model = BertForClozeQA.from_pretrained(args.model)
+    model.to(device)
+
+    if args.train:
+        logger.info('Loading preprocessed data...')
+        train_data = ClozeQADataset(torch.load(CACHE/'train.pt'))
+        valid_data = ClozeQADataset(torch.load(CACHE/'valid.pt'))
+
+        logger.info('Start training...')
+        train(model, train_data)
+
+    if args.eval:
+        logger.info('Loading preprocessed data...')
+        test_data = ClozeQADataset(torch.load(CACHE/'test.pt'))
+
+        logger.info('Start evaluating...')
+        accuracy = evaluate(model, test_data)
+        logger.info(f"TEST Accurracy: {accuracy}")
 
 
 if __name__ == '__main__':
-    config = BertConfig.from_pretrained(BERT)
-    model = BertForClozeQA.from_pretrained(BERT)
-    model.to(device)
-
-    train_data = ClozeQADataset(torch.load(CACHE/'train.pt'))
-    valid_data = ClozeQADataset(torch.load(CACHE/'valid.pt'))
-
-    train(model, train_data)
+    main()

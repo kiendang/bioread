@@ -28,10 +28,13 @@ class BertForClozeQA(BertForPreTraining):
 
         sequence_output, *_ = outputs
 
-        start_logits = self.cloze_qa_outputs(sequence_output).squeeze(-1)
-        start_logits_concat = start_logits.reshape(batch_dim, -1)
+        start_logits = (
+            self.cloze_qa_outputs(sequence_output)
+                .squeeze(-1)
+                .reshape(batch_dim, -1)
+        )
 
-        p = torch.softmax(start_logits_concat, dim=1)
+        p = torch.softmax(start_logits, dim=1)
         pm = p * p_mask
         pm = pm / torch.sum(pm, dim=1, keepdim=True).expand_as(pm)
         pc = torch.bmm(pm.unsqueeze(1), torch.transpose(candidates, 1, 2).float()).squeeze(1)
