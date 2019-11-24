@@ -6,9 +6,6 @@ from itertools import islice
 from pathlib import Path
 
 
-BIOREAD_LITE_DIR = Path.home()/'bioread_lite'
-VALID_DIR = BIOREAD_LITE_DIR/'valid'
-
 FAKE_URL = 'http://some_url'
 
 
@@ -60,6 +57,7 @@ def convert_folder(src, dst, n=None):
 
 
 def main():
+    BIOREAD_LITE_DIR = Path.home()/'bioread_lite'
     convert_folder(
         BIOREAD_LITE_DIR/'test',
         BIOREAD_LITE_DIR/'questions'/'test',
