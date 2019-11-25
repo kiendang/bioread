@@ -8,6 +8,8 @@ Data need to be converted to CNN/Daily Mail format using `scripts/bioread_cloze.
 
 Embeddings need to be converted from binary to text format using `scripts/w2v2glove.py`.
 
+*NOTE: I only used 200000 examples of BioreadLite training set (25%) for training and 5000 examples in the dev set (10%) for validation.*
+
 ## Run the code
 
 Requirements: `docker`, `nvidia-container-toolkit` or `nvidia-docker2`.
@@ -34,7 +36,7 @@ docker run --gpus all \
 
 where `W2V_DIR` and `BIOREAD_DIR` are paths to the directories containing the word embeddings and dataset respectively.
 
-If using `docker<=19.03` and/or using `nvidia-docker2` instead of `nvidia-container-toolkit`, swap `--runtime=nvidia` for `--gpus`
+If using `docker<=19.03` and/or using `nvidia-docker2` instead of `nvidia-container-toolkit`, swap `--runtime=nvidia` for `--gpus all`.
 
 ### Train the model
 
