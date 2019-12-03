@@ -1,4 +1,4 @@
-from utils import Example
+from preprocess import Example
 
 import torch
 import torch.nn.functional as F
@@ -9,7 +9,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm, trange
 
 from transformers import AdamW, get_linear_schedule_with_warmup
-from modeling_cloze_qa import BertForClozeQA
+from modelling_cloze_qa import BertForClozeQA
 
 import argparse
 import logging

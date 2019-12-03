@@ -1,5 +1,5 @@
 from modeling_cloze_qa import BertForClozeQA
-from utils import preprocess
+from preprocess import preprocess
 
 import torch
 from tqdm import tqdm
