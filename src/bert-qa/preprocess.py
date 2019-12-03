@@ -1,5 +1,3 @@
-from transformers import BertConfig, BertTokenizer
-
 import numpy as np
 import torch
 
