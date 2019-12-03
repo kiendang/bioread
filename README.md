@@ -6,7 +6,13 @@ Available models are [Gated Attention Reader](https://arxiv.org/abs/1606.01549) 
 
 The BioRead and BioReadLite datasets can be obtained [here](https://archive.org/details/bioread_dataset.tar) (from http://nlp.cs.aueb.gr/publications.html).
 
-Data need to be converted to [CNN/Daily Mail](https://arxiv.org/abs/1506.03340) format using `scripts/bioread_cloze.py`.
+Data need to be converted to [CNN/Daily Mail](https://arxiv.org/abs/1506.03340) format. Run
+
+```sh
+csplit -z --suppress-matched <file> '/^==============================$/' '{*}'
+```
+
+to split each file (train, valid, test) into multiple files (one per example) then format using `scripts/bioread_cloze.py`.
 
 ## Set up environment
 
