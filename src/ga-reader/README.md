@@ -1,14 +1,14 @@
-# Code for training Gated Attention Reader on Bioread dataset
+# Code for training Gated Attention Reader on BioRead dataset
 
 ## Prepare dataset and word embeddings
 
-The Bioread and BioreadLite datasets can be obtained [here](https://archive.org/details/bioread_dataset.tar) (from http://nlp.cs.aueb.gr/publications.html), word embeddings (trained on MEDLINE®/PubMed®) [here](https://archive.org/details/pubmed2018_w2v_200D.tar) (from http://nlp.cs.aueb.gr/software.html)
+The BioRead and BioReadLite datasets can be obtained [here](https://archive.org/details/bioread_dataset.tar) (from http://nlp.cs.aueb.gr/publications.html), word embeddings (trained on MEDLINE®/PubMed®) [here](https://archive.org/details/pubmed2018_w2v_200D.tar) (from http://nlp.cs.aueb.gr/software.html)
 
 Data need to be converted to CNN/Daily Mail format using `scripts/bioread_cloze.py`.
 
 Embeddings need to be converted from binary to text format using `scripts/w2v2glove.py`.
 
-*NOTE: I only used 200000 examples of BioreadLite training set (25%) for training and 5000 examples in the dev set (10%) for validation.*
+*NOTE: I only used 200000 examples in BioReadLite training set (25%) for training and 5000 examples in the dev set (10%) for validation.*
 
 ## Run the code
 

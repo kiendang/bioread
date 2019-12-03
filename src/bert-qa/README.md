@@ -1,4 +1,4 @@
-# Code for adapting BERT to Bioread dataset
+# Code for adapting BERT to BioRead dataset
 
 ## Prepare
 
@@ -10,7 +10,7 @@ Run `run_preprocess.py` to preprocess and cache data. Edit paths to data, pretra
 
 ## Train model
 
-Edit paths to preprocessed data, pretrained model and output model in `run_cloze_qa.py`. Hyperparameters can be adjusted as well. The ones in the file are what I used when training BioreadLite on 1 single V100 GPU for 2 epochs using 40000 examples in the training set (5%) for training and 5000 in the dev set (10%) for validation.
+Edit paths to preprocessed data, pretrained model and output model in `run_cloze_qa.py`. Hyperparameters can be adjusted as well. The ones in the file are what I used when training BioReadLite on 1 single V100 GPU for 2 epochs using 40000 examples in the training set (5%) for training and 5000 in the dev set (10%) for validation.
 
 ```sh
 python run_cloze_qa.py --train
